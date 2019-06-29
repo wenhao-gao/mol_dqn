@@ -1,2 +1,2 @@
-# mol_gen_models
-Implementation of generative models
+# Mol_DQN
+Implementation of Deep Q learning network for molecular optimization
