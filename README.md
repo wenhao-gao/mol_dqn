@@ -1,2 +1,2 @@
-# mol_gen_model
+# mol_gen_models
 Implementation of generative models
