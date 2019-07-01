@@ -106,7 +106,7 @@ class DeepQNetwork(object):
 
         if self.num_bootstrap_heads:
             head_mask = tf.keras.backend.random_binomial(shape=(1, self.num_bootstrap_heads), p=0.6)
-            td_error = tf.reduce_mean(td_error * head_mask, aixs=1)
+            td_error = tf.reduce_mean(td_error * head_mask, axis=1)
 
         errors = tf.where(
             tf.abs(td_error) < 1.0, tf.square(td_error) * 0.5,

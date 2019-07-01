@@ -26,9 +26,9 @@ import tensorflow as tf
 from tensorflow import gfile
 
 import deep_q_networks
-import mol_env as molecules_mdp
-import mol_utility as molecules
-import tf_core as core
+import mol_env
+import mol_utils
+import nn_utils
 
 
 flags.DEFINE_string('model_dir',
@@ -50,7 +50,7 @@ flags.DEFINE_boolean('multi_objective', False,
 FLAGS = flags.FLAGS
 
 
-class TargetWeightMolecule(molecules_mdp.Molecule):
+class TargetWeightMolecule(mol_env.Molecule):
     """Defines the subclass of a molecule MDP with a target molecular weight."""
 
     def __init__(self, target_weight, **kwargs):
@@ -68,7 +68,7 @@ class TargetWeightMolecule(molecules_mdp.Molecule):
         return -min(abs(lower - mw), abs(upper - mw))
 
 
-class MultiObjectiveRewardMolecule(molecules_mdp.Molecule):
+class MultiObjectiveRewardMolecule(mol_env.Molecule):
     """Defines the subclass of generating a molecule with a specific reward.
     The reward is defined as a 1-D vector with 2 entries: similarity and QED
     reward = (similarity_score, qed_score)
@@ -78,7 +78,7 @@ class MultiObjectiveRewardMolecule(molecules_mdp.Molecule):
         super(MultiObjectiveRewardMolecule, self).__init__(**kwargs)
         target_molecule = Chem.MolFromSmiles(target_molecule)
         self._target_mol_fingerprint = self.get_fingerprint(target_molecule)
-        self._target_mol_scaffold = molecules.get_scaffold(target_molecule)
+        self._target_mol_scaffold = mol_utils.get_scaffold(target_molecule)
         self.reward_dim = 2
 
     def get_fingerprint(self, molecule):
@@ -104,7 +104,7 @@ class MultiObjectiveRewardMolecule(molecules_mdp.Molecule):
         if mol is None:
             return 0.0, 0.0
 
-        if molecules.contains_scaffold(mol, self._target_mol_scaffold):
+        if mol_utils.contains_scaffold(mol, self._target_mol_scaffold):
             similarity_score = self.get_similarity(self._state)
         else:
             similarity_score = 0.0
@@ -320,7 +320,7 @@ def run_dqn(multi_objective=False):
         dqn=dqn
     )
 
-    core.write_hparams(hparams, os.path.join(FLAGS.model_dir, 'config.json'))
+    nn_utils.write_hparams(hparams, os.path.join(FLAGS.model_dir, 'config.json'))
 
 
 def main(argv):

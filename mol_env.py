@@ -11,7 +11,7 @@ from rdkit.Chem import Draw
 from six.moves import range
 from six.moves import zip
 
-import mol_utility as molecules
+import mol_utils
 
 
 class Result(collections.namedtuple('Result', ['state', 'reward', 'terminated'])):
@@ -33,7 +33,7 @@ def get_valid_actions(state,
         raise ValueError('Received invalid state: %s' & state)
 
     atom_valences = {
-        atom_type: molecules.atom_valences([atom_type])[0]
+        atom_type: mol_utils.atom_valences([atom_type])[0]
         for atom_type in atom_types
     }
 
@@ -239,7 +239,7 @@ class Molecule(object):
         self._path = []
         self._max_bonds = 4
         atom_types = list(self.atom_types)
-        self._max_new_bonds = dict(list(zip(atom_types, molecules.atom_valences(atom_types))))
+        self._max_new_bonds = dict(list(zip(atom_types, mol_utils.atom_valences(atom_types))))
 
     @property
     def state(self):
