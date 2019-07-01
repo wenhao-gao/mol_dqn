@@ -290,7 +290,8 @@ def get_hparams(**kwargs):
         batch_norm=False,
         save_frequency=1000,
         max_num_checkpoints=100,
-        discount_factor=0.7)
+        discount_factor=0.7
+    )
     return hparams.override_from_dict(kwargs)
 
 
