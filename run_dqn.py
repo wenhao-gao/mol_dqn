@@ -32,7 +32,7 @@ import nn_utils
 
 
 flags.DEFINE_string('model_dir',
-                    './model/',
+                    './checkpoints/',
                     'The directory to save data to.')
 flags.DEFINE_string('target_molecule', 'C1CCC2CCCCC2C1',
                     'The SMILES string of the target molecule.')
