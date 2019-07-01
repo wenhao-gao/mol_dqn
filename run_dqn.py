@@ -6,14 +6,11 @@ import functools
 import json
 import os
 import time
+import numpy as np
 
 from absl import app
 from absl import flags
 from absl import logging
-import schedules
-import replay_buffer
-
-import numpy as np
 
 from rdkit import Chem
 from rdkit import DataStructs
@@ -25,10 +22,13 @@ from six.moves import range
 import tensorflow as tf
 from tensorflow import gfile
 
-import deep_q_networks
-import mol_env
-import mol_utils
-import nn_utils
+from model import deep_q_networks
+from model import nn_utils
+
+from rl import mol_env
+from rl import mol_utils
+from rl import schedules
+from rl import replay_buffer
 
 
 flags.DEFINE_string('model_dir',

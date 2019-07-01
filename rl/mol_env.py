@@ -11,7 +11,7 @@ from rdkit.Chem import Draw
 from six.moves import range
 from six.moves import zip
 
-import mol_utils
+from rl import mol_utils
 
 
 class Result(collections.namedtuple('Result', ['state', 'reward', 'terminated'])):
