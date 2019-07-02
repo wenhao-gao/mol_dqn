@@ -14,9 +14,10 @@ from absl import flags
 from absl import logging
 from tensorflow import gfile
 
+from logger import Logger
 from model import deep_q_networks
 from model import nn_utils
-from rl.q_learning import run_training
+from rl.q_learning import q_learning_train
 
 from task_env.envs import MultiObjectiveRewardMolecule, OptLogPMolecule
 
@@ -67,6 +68,7 @@ def run_dqn(multi_objective=False):
             '\t%s: %s' % (key, value) for key, value in sorted(hparams.values().items())
         ])
     )
+    logger = Logger()
 
     # Define environment and network
     if multi_objective:
@@ -118,8 +120,9 @@ def run_dqn(multi_objective=False):
         )
 
     # Train the DQN
-    run_training(
+    q_learning_train(
         flags=FLAGS,
+        logger=logger,
         hparams=hparams,
         environment=environment,
         dqn=dqn

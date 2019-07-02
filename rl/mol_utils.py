@@ -26,6 +26,7 @@ from rdkit.Chem.Scaffolds import MurckoScaffold
 from SA_Score import sascorer
 
 
+# TODO change to multiple valence
 def atom_valences(atom_types):
     """Creates a list of valences corresponding to atom_types.
     Note that this is not a count of valence electrons, but a count of the
@@ -38,7 +39,7 @@ def atom_valences(atom_types):
     """
     periodic_table = Chem.GetPeriodicTable()
     return [
-        max(list(periodic_table.GetValenceList(atom_type)))
+        min(list(periodic_table.GetValenceList(atom_type)))
         for atom_type in atom_types
     ]
 

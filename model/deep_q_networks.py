@@ -31,6 +31,52 @@ class DeepQNetwork(object):
                  num_bootstrap_heads=10,
                  scope='dqn',
                  reuse=None):
+        """Initialization of the Q Network
+
+        Argument
+        ------------
+
+            - input_shape. Tuple.
+                The shape of input.
+
+            - q_fn. A function.
+                The Q value function. Take observation feature as input and
+                output is the Q value of the observation.
+
+            - learning_rate. Float.
+                The learning rate of optimizer.
+
+            - learning_rate_decay_step. Int.
+                The number of steps between each learning rate decay.
+
+            - learning_rate_decay_rate. Float.
+                The rate of learning rate decay.
+
+            - optimizer. String.
+                which optimizer to use.
+
+            - grad_clipping. Boolean.
+                Whether to clip gradient.
+
+            - gamma. Float.
+                Discount factor.
+
+            - epsilon. Float.
+                The probability of choosing a random action.
+
+            - double_q. Boolean.
+                Whether or not to use double Q learning.
+
+            - num_bootstrap_head. Int.
+                The number of bootstrap head to use.
+
+            - scope. Variable scope.
+
+            - reuse. Boolean.
+                Whether or not the variable should be reused.
+
+
+        """
         self.input_shape = input_shape
         self.q_fn = q_fn
         self.learning_rate = learning_rate
@@ -209,7 +255,28 @@ class DeepQNetwork(object):
         ))
 
     def get_action(self, observations, stochastic=True, head=0, update_epsilon=None):
-        """Funstion that choose an action given the observations"""
+        """Funstion that choose an action given the observations
+
+        Argument
+        ------------
+
+            - observations. np.array. shape = [num_actions, fingerprint_length].
+                The next states.
+
+            - stochastic. Boolean.
+                If set to True, all the actions are always deterministic.
+
+            - head. Int.
+                The number of bootstrap heads.
+
+            - update_epsilon. Float or None.
+                Update the epsilon to a new value.
+
+        Return
+
+            - action.
+
+        """
         if update_epsilon is not None:
             self.epsilon = update_epsilon
 
@@ -219,7 +286,32 @@ class DeepQNetwork(object):
             return self._run_action_op(observations, head)
 
     def train(self, states, rewards, next_states, done, weight, summary=True):
-        """Function that takes a transition (s, a, r, s') and optimizes TD error"""
+        """Function that takes a transition (s, a, r, s') and optimizes TD error
+
+        Argument
+        ------------
+
+            - states. A batch of observations.
+
+            - rewards. np.array, immediate reward attained after executing those actions.
+
+            - next_states. observations that followed states.
+
+            - done. np.array, 1 if obs_t was the last observation in the episode and
+                0 otherwise obs_tp1 gets ignored, but must be of the valid shape.
+
+            - weight. np.array, importance sampling weights for every element of the batch
+
+            - summary. Boolean, whether to get summary.
+
+        Return
+
+            - TD_error. np.array. a list of differences between Q(s,a) and
+                the TD target in Bellman's equation.
+
+            - Error summary
+
+        """
         if summary:
             ops = [self.td_error, self.error_summary, self.optimization_op]
         else:

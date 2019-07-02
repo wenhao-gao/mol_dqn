@@ -15,7 +15,21 @@ from rl import mol_utils
 
 
 class Result(collections.namedtuple('Result', ['state', 'reward', 'terminated'])):
-    """A named tuple define teh result for a step for the molecular class"""
+    """A named tuple define teh result for a step for the molecular class
+
+    Argument
+    ----------
+
+        - state. Chem.RWMol.
+            The molecule reached after taking the action
+
+        - reward. Float.
+            The reward get after taking the action.
+
+        - terminated. Boolean.
+            Whether this episode is terminated.
+
+    """
 
 
 def get_valid_actions(state,
@@ -24,25 +38,49 @@ def get_valid_actions(state,
                       allow_no_modification,
                       allowed_ring_sizes,
                       allow_bonds_between_rings):
-    """Compute a set of valid action for given state"""
+    """Compute a set of valid action for given state
+
+    Argument
+    ------------
+
+        - state. String SMILES.
+            The current state.
+
+        - atom_types. Set of string atom types.
+
+        - allow_removal. Boolean
+            Whether to allow removal action.
+
+        - allow_no_modification. Boolean.
+            Whether to allow no modification.
+
+        - allowed_ring_sizes. Set of integer.
+
+        - allow_bonds_between_rings. Boolean.
+
+    """
+    # Check validity
     if not state:
         return copy.deepcopy(atom_types)
 
     mol = Chem.MolFromSmiles(state)
     if mol is None:
-        raise ValueError('Received invalid state: %s' & state)
+        raise ValueError('Received invalid state: %s' % state)
 
+    # Get additional atoms valences
     atom_valences = {
         atom_type: mol_utils.atom_valences([atom_type])[0]
         for atom_type in atom_types
     }
 
+    # Get available atom location
     atoms_with_free_valence = {}
     for i in range(1, max(atom_valences.values())):
         atoms_with_free_valence[i] = [
             atom.GetIdx() for atom in mol.GetAtoms() if atom.GetNumImplicitHs() >= i
         ]
 
+    # Get valid actions
     valid_actions = set()
 
     valid_actions.update(
@@ -221,6 +259,41 @@ class Molecule(object):
                  max_steps=10,
                  target_fn=None,
                  record_path=False):
+        """Initialization of Molecule Generation MDP
+
+        Argument
+        --------
+
+            - atom_types. The set of elements molecule may contain.
+
+            - init_mol. String SMILES, Chem.Mol or Chem.RWMol
+                If None, the process starts from empty.
+
+            - allow_removal. Boolean.
+                Whether allow to remove bonds.
+
+            - allow_no_modification. Boolean.
+                Whether allow to retain the molecule.
+
+            - allow_bonds_between_rings. Boolean.
+                Whether allow to form a bond between rings.
+
+            - allowed_ring_sizes. Set of integers.
+                The size of rings allowed to form.
+
+            - max_steps. Integer.
+                Maximum steps allowed to take in one episode.
+
+            - target_fn. Function or None.
+                The function should take a SMILES as an input and returns a Boolean
+                which indicates whether the input satisfy some criterion. If criterion
+                is met, the episode will be terminated.
+
+            - record_path. Boolean.
+                Whether to record the steps internally.
+
+        """
+
         if isinstance(init_mol, Chem.Mol):
             init_mol = Chem.MolToSmiles(init_mol)
 
@@ -291,6 +364,22 @@ class Molecule(object):
         return self._target_fn(self._state)
 
     def step(self, action):
+        """Take an action
+
+        Argument
+        -----------
+
+            - action. Chem.RWMol.
+                The molecule after taking this action
+
+        Return
+
+            - result. Result object.
+                * state. The molecule reached after taking the action.
+                * reward. The reward get after taking the action.
+                * terminated. Whether this episode is terminated.
+
+        """
         if self._counter >= self.max_steps or self._goal_reached():
             raise ValueError('This episode is terminated.')
         if action not in self._valid_actions:
@@ -312,6 +401,21 @@ class Molecule(object):
         return result
 
     def visualize_state(self, state=None, **kwargs):
+        """Draw the molecule of the state.
+
+        Argument
+        ------------
+
+            - state. SMILES, Chem.Mol or Chem.RWMol
+                If None, will take current state as input.
+
+            - kwargs. keywords pass to Draw.MolToImage function.
+
+        Return
+
+            A PIL image containing a drawing of the molecule.
+
+        """
         if state is None:
             state = self._state
         if isinstance(state, str):
